@@ -1,0 +1,49 @@
+<%
+const color = 'red';
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+
+
+<body>
+
+    <header>
+        <%- include('./parts/header');%>
+    </header>
+
+
+    <p>
+       <span style='color: black;'>Hello</span>
+       <span style='color: blue;'>from</span>
+       <span style='color: <%= color %>;'>AUIS</span>
+
+
+
+       <p>the student's name is <%= name %></p>
+
+        <% if (courses.length > 0) {%>
+            <% courses.forEach( c => {%>
+                <p>
+                    <span><%= c.code %></span>
+                    <span><%= c.title %></span>
+                </p>
+            <%});%>
+        <%}%>
+        
+
+ 
+        
+
+   </p>
+
+   <!-- the <%%> is basically not sent directly but first rendered by the server-->
+
+
+</html> 
