@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- ... (head content) ... -->
+</head>
+
+<body>
+    <h1>Enter Points for Courses</h1>
+    <form action="/submit-points" method="post">
+        <% courses.forEach(course=> { %>
+            <label for="<%= course.id %>">
+                <%= course.title %>:
+                    <input type="number" id="<%= course.id %>" name="<%=course.id %>" required>
+            </label><br>
+            <% }); %>
+                <button type="submit">Submit Course Points</button>
+    </form>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Person {
+    // these numbers are the order
+    String name = 1;
+    int32 age = 2;
+    uint64 salary = 3; //Long unsigned
+}

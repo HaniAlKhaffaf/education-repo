@@ -1,111 +1,118 @@
+
+/* Hani Amer ha20431@auis.edu.krd    Noor Safaa ns20352@auis.edu.krd */
+
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-
 const app = express();
-const port = 3000;
+const port = 8000;
 
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(session({
-    secret: 'your-secret-key',
+    secret: 'verySecretKey',
     resave: false,
     saveUninitialized: false,
-    // You can configure more options here, such as session expiration and storage.
 }));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-// Sample users data (you should use a database in a real application)
+// creating multiple users
 const users = [
-    { id: 1, username: 'user1', password: 'password1' },
-    { id: 2, username: 'user2', password: 'password2' },
+    { username: 'hani123', password: 'hani123' },
+    { username: 'harry', password: 'harry123' },
+    { username: 'ron', password: 'ron123' },
 ];
-const todos = [];
 
-app.get('/loginForm', (req, res) => {
-    app.render('/login');
-})
-
-// Login route
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-
-    const user = users.find(u => u.username === username && u.password === password);
-    if (user) {
-        req.session.user = user; // Store user information in the session
-        res.send('Login successful');
-    } else {
-        res.status(401).send('Invalid credentials');
-    }
-});
-
-// Logout route
-app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.error('Error destroying session:', err);
-        }
-        res.redirect('/');
-    });
-});
-
-
+// i am using this middleware so that i can authenticate the user in each step
 function requireAuthentication(req, res, next) {
     if (req.session.user) {
-        next(); // User is authenticated, continue to the next middleware
+        next();
     } else {
-        res.redirect('/login'); // Redirect to the login page
+        res.redirect('/login');
     }
 }
 
-// Example of a protected route
-app.get('/profile', requireAuthentication, (req, res) => {
-    res.send(`Welcome, ${req.session.user.username}!`);
+// main page, retrieving the data from cookie and displaying them, also the username
+app.get('/', requireAuthentication, (req, res) => {
+    const user = users.find((u) => u.username === req.session.user.username);
+    const tasks = JSON.parse(req.cookies[`${user.username}_tasks`] || '[]');
+    res.render('todo', { user, tasks });
 });
 
-app.post('/todos', requireAuthentication, (req, res) => {
-    const { title } = req.body;
-    const id = todos.length + 1;
-    const todo = { id, title, completed: false };
-    todos.push(todo);
-    res.status(201).json(todo);
+// loogin page render
+app.get('/login', (req, res) => {
+    res.render('login');
 });
 
-// Get all todos
-app.get('/todos', requireAuthentication, (req, res) => {
-    res.json(todos);
-});
-
-// Update a todo by ID
-app.put('/todos/:id', requireAuthentication, (req, res) => {
-    const id = parseInt(req.params.id);
-    const todo = todos.find((t) => t.id === id);
-
-    if (!todo) {
-        return res.status(404).json({ error: 'Todo not found' });
+// processing the data of logging in
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find((u) => u.username === username && u.password === password);
+    if (user) {
+        req.session.user = user;
+        res.redirect('/');
+    } else {
+        res.redirect('/login');
     }
-
-    todo.title = req.body.title || todo.title;
-    todo.completed = req.body.completed || todo.completed;
-
-    res.json(todo);
 });
 
-// Delete a todo by ID
-app.delete('/todos/:id', requireAuthentication, (req, res) => {
-    const id = parseInt(req.params.id);
-    const index = todos.findIndex((t) => t.id === id);
+// processing the logout
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
 
-    if (index === -1) {
-        return res.status(404).json({ error: 'Todo not found' });
+// for adding new tasks
+app.post('/tasks', requireAuthentication, (req, res) => {
+    const user = users.find((u) => u.username === req.session.user.username);
+    const tasks = JSON.parse(req.cookies[`${user.username}_tasks`] || '[]');
+    const { title, dueDate } = req.body;
+    tasks.push({ title, dueDate });
+    res.cookie(`${user.username}_tasks`, JSON.stringify(tasks));
+    res.redirect('/');
+});
+
+// for deleting tasks
+app.post('/tasks/:index/delete', requireAuthentication, (req, res) => {
+    const user = users.find((u) => u.username === req.session.user.username);
+    const tasks = JSON.parse(req.cookies[`${user.username}_tasks`] || '[]');
+    const index = parseInt(req.params.index);
+    if (index >= 0 && index < tasks.length) {
+        tasks.splice(index, 1);
+        // i am basically removing the desired task by the index when pressed
     }
+    res.cookie(`${user.username}_tasks`, JSON.stringify(tasks));
+    res.redirect('/');
+});
 
-    todos.splice(index, 1);
-    res.status(204).send();
+// code for updating the tasks
+app.post('/tasks/:index/update', requireAuthentication, (req, res) => {
+    const user = users.find((u) => u.username === req.session.user.username);
+    const tasks = JSON.parse(req.cookies[`${user.username}_tasks`] || '[]');
+    const index = parseInt(req.params.index);
+    if (index >= 0 && index < tasks.length) {
+        const { title, dueDate } = req.body;
+        tasks[index].title = title;
+        tasks[index].dueDate = dueDate;
+    }
+    res.cookie(`${user.username}_tasks`, JSON.stringify(tasks));
+    res.redirect('/');
 });
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+
+/* REFRENCES
+
+    1- For creating user authentication and widdleware, Link: https://jonathan-holloway.medium.com/node-and-express-session-a23eb36a052
+    2- For creating cookies and how to use their data, Link: https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
+    3- For deleting the Tasks i learned how to use Splice, Link: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+    4- For learning how to use the External CSS in expressjs, Link: https://medium.com/@kyosuke0215/how-to-use-external-css-in-node-js-with-express-f50d2a956e3a
+    5- For styling i used a combintion of my own, chatGPT, and this website: https://copy-paste-css.com/
+
+*/

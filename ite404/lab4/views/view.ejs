@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- ... (head content) ... -->
+</head>
+
+<body>
+    <h1>Syllabus Details</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% syllabi.forEach(syllabus=> { %>
+                <tr>
+                    <td>
+                        <%= syllabus.id %>
+                    </td>
+                    <td>
+                        <%= syllabus.title %>
+                    </td>
+                    <td>
+                        <%= syllabus.descr %>
+                    </td>
+                    <td>
+                        <%= syllabus.points %>
+                    </td>
+                </tr>
+                <% }); %>
+        </tbody>
+    </table>
+
+    <p>Average Points: <span style="font-weight: bold; color: black;">
+            <%= averagePoints.toFixed(2) %>
+        </span></p>
+
+</body>
+
+</html>

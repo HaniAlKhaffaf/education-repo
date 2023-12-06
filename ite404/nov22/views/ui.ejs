@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        // this script is js code but will be run on the client side
+        // why do we need it? --> write js code to retrieve data from the WS so we can use it
+
+        function sayHello() {
+            // AJAX - Built-in web browsers
+            const http_req = new XMLHttpRequest();
+
+            http_req.onreadystatechange = function () {
+                if (http_req.readyState == 4) {
+                    alert(http_req.responseText);
+                }
+            };
+            http_req.open("GET", "http://localhost/web-services", true);
+            http_req.send();
+        }
+    </script>
+
+    <p>Hello from UI</p>
+
+    <button type="button" onclick="sayHello()">Clicke Here!</button>
+</body>
+
+</html>

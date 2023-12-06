@@ -1,0 +1,5 @@
+Insert SQL -> mysql,
+how can you know the value of the Primarykey(ID)
+of the newly inserted record
+
+Search online
